@@ -473,6 +473,7 @@ class OKXTradingEngine:
         self.api_key = os.getenv('OKX_API_KEY')
         self.api_secret = os.getenv('OKX_API_SECRET')
         self.passphrase = os.getenv('OKX_PASSPHRASE')
+        self.sandbox_mode = os.getenv('OKX_SANDBOX', 'true').lower() == 'true'
         
         if not all([self.api_key, self.api_secret, self.passphrase]):
             logger.warning("OKX credentials not found in environment variables. Running in simulation mode.")
@@ -493,6 +494,7 @@ class OKXTradingEngine:
                 'secret': self.api_secret,
                 'password': self.passphrase,
                 'enableRateLimit': True,
+                'sandboxMode': self.sandbox_mode,
                 'options': {
                     'defaultType': 'future',
                     'adjustForTimeDifference': True
