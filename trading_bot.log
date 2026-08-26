@@ -1,0 +1,5 @@
+2026-08-26 08:29:36 | WARNING  | Rabiah6X_Bot | __init__:478 | OKX credentials not found in environment variables. Running in simulation mode.
+2026-08-26 08:29:36 | INFO     | Rabiah6X_Bot | __init__:674 | Rabiah6X Bot initialized with config: BTC/USDT, TF: 5m
+2026-08-26 08:29:36 | INFO     | Rabiah6X_Bot | connect:487 | Running in SIMULATION MODE - no real trades will be executed
+2026-08-26 08:29:36 | WARNING  | Rabiah6X_Bot | get_ohlcv:530 | Simulation mode: returning mock data for BTC/USDT
+2026-08-26 08:29:36 | INFO     | Rabiah6X_Bot | _trading_cycle:727 | Signal: EXIT_LONG | Price: 48961.53 | Reason: Early exit (DEMA/RSI)

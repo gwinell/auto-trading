@@ -473,7 +473,11 @@ class OKXTradingEngine:
         self.api_key = os.getenv('OKX_API_KEY')
         self.api_secret = os.getenv('OKX_API_SECRET')
         self.passphrase = os.getenv('OKX_PASSPHRASE')
-        self.sandbox_mode = os.getenv('OKX_SANDBOX', 'true').lower() == 'true'
+        # По умолчанию используем False - это позволяет работать с любыми ключами
+        # sandboxMode=True только для специальных демо-ключей из раздела Demo Trading
+        self.sandbox_mode = os.getenv('OKX_SANDBOX', 'false').lower() == 'true'
+        # Режим эмуляции торговли (paper trading) - для тестирования без реальных ордеров
+        self.paper_trading = os.getenv('PAPER_TRADING', 'true').lower() == 'true'
         
         if not all([self.api_key, self.api_secret, self.passphrase]):
             logger.warning("OKX credentials not found in environment variables. Running in simulation mode.")
@@ -489,14 +493,15 @@ class OKXTradingEngine:
                 self.is_connected = True
                 return True
             
-            # OKX требует использования sandboxMode только для демо-ключей
-            # Для реальных ключей используйте production режим
+            # Для демо-ключей из раздела 'Demo Trading' используем sandboxMode=True
+            # Для обычных ключей (даже если это демо-аккаунт) используем sandboxMode=False
+            # OKX определяет тип ключа по префиксу API-ключа
             self.exchange = ccxt.okx({
                 'apiKey': self.api_key,
                 'secret': self.api_secret,
                 'password': self.passphrase,
                 'enableRateLimit': True,
-                'sandboxMode': self.sandbox_mode,  # True для демо-ключей, False для реальных
+                'sandboxMode': self.sandbox_mode,
                 'options': {
                     'defaultType': 'future',
                     'adjustForTimeDifference': True,
@@ -522,11 +527,13 @@ class OKXTradingEngine:
             # Подсказка для пользователя
             if "APIKey does not match" in error_msg or "50101" in error_msg:
                 logger.error(">>> ОШИБКА: API-ключи не соответствуют среде (Sandbox/Production)")
+                logger.error(">>> Возможные причины:")
+                logger.error(">>>   1. У вас ОБЫЧНЫЕ ключи (не Demo Trading), но OKX_SANDBOX=true")
+                logger.error(">>>   2. У вас DEMO-ключи из раздела 'Demo Trading', но OKX_SANDBOX=false")
                 logger.error(">>> Решение:")
-                logger.error(">>>   - Если используете ДЕМО-ключи: установите OKX_SANDBOX=true в .env")
-                logger.error(">>>   - Если используете РЕАЛЬНЫЕ ключи: установите OKX_SANDBOX=false в .env")
-                logger.error(">>>   - Демо-ключи создаются в разделе 'Demo Trading' на okx.com")
-                logger.error(">>>   - Реальные ключи создаются в разделе 'API Management' на okx.com")
+                logger.error(">>>   - Попробуйте установить OKX_SANDBOX=false в .env (для обычных ключей)")
+                logger.error(">>>   - Или установите PAPER_TRADING=true для тестирования без подключения к бирже")
+                logger.error(">>> Примечание: Большинство пользователей OKX используют обычные ключи с OKX_SANDBOX=false")
             
             self.is_connected = False
             return False
