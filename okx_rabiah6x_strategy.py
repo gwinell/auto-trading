@@ -489,15 +489,18 @@ class OKXTradingEngine:
                 self.is_connected = True
                 return True
             
+            # OKX требует использования sandboxMode только для демо-ключей
+            # Для реальных ключей используйте production режим
             self.exchange = ccxt.okx({
                 'apiKey': self.api_key,
                 'secret': self.api_secret,
                 'password': self.passphrase,
                 'enableRateLimit': True,
-                'sandboxMode': self.sandbox_mode,
+                'sandboxMode': self.sandbox_mode,  # True для демо-ключей, False для реальных
                 'options': {
                     'defaultType': 'future',
-                    'adjustForTimeDifference': True
+                    'adjustForTimeDifference': True,
+                    'warnOnFetchOpenOrdersWithoutSymbol': False
                 }
             })
             
@@ -509,11 +512,22 @@ class OKXTradingEngine:
                 await self.exchange.set_leverage(self.config.leverage, self.config.symbol)
             
             self.is_connected = True
-            logger.info(f"Connected to OKX. Symbol: {self.config.symbol}, Leverage: {self.config.leverage}x")
+            logger.info(f"Connected to OKX. Symbol: {self.config.symbol}, Leverage: {self.config.leverage}x, Sandbox: {self.sandbox_mode}")
             return True
             
         except Exception as e:
-            logger.error(f"Failed to connect to OKX: {str(e)}")
+            error_msg = str(e)
+            logger.error(f"Failed to connect to OKX: {error_msg}")
+            
+            # Подсказка для пользователя
+            if "APIKey does not match" in error_msg or "50101" in error_msg:
+                logger.error(">>> ОШИБКА: API-ключи не соответствуют среде (Sandbox/Production)")
+                logger.error(">>> Решение:")
+                logger.error(">>>   - Если используете ДЕМО-ключи: установите OKX_SANDBOX=true в .env")
+                logger.error(">>>   - Если используете РЕАЛЬНЫЕ ключи: установите OKX_SANDBOX=false в .env")
+                logger.error(">>>   - Демо-ключи создаются в разделе 'Demo Trading' на okx.com")
+                logger.error(">>>   - Реальные ключи создаются в разделе 'API Management' на okx.com")
+            
             self.is_connected = False
             return False
     
