@@ -1,6 +1,10 @@
 # Rabiah6X - UT Bot + 1:1 Scalp Targets + DEMA + FVG
 
-Python implementation of the TradingView Pine Script strategy for automated trading on OKX exchange.
+Experimental Python implementation of a TradingView Pine Script strategy using OKX exchange APIs.
+
+> **Project status:** educational / research prototype, not a production-ready trading system. The code includes real-order execution paths if configured with exchange credentials. Review the implementation, permissions and risk controls independently before any use. No performance or profitability claim is made here.
+
+> **Credential safety:** only `.env.example` is tracked. Copy it to a local, git-ignored `.env`; never commit real API keys. Exchange keys with withdrawal permissions should never be used for experiments.
 
 ## Features
 
